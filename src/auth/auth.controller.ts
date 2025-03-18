@@ -4,7 +4,7 @@ import { AuthService } from "./auth.service";
 import { Public } from "../common/decorators/public.decorator";
 import { RegisterDto } from "./dto/register.dto";
 import { Request } from "express";
-import { ApiBearerAuth, ApiResponse } from "@nestjs/swagger";
+import { ApiResponse } from "@nestjs/swagger";
 import { TokenDto } from "./dto/response.dto";
 import { User } from "../user/entities/user.entity";
 
