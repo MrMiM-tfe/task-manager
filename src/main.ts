@@ -30,7 +30,7 @@ async function bootstrap() {
 	});
 	
 	app.useGlobalFilters(new TypeOrmExceptionFilter())
-	app.useGlobalPipes(new ValidationPipe());
+	app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
 	
 	await app.listen(process.env.PORT ?? 3000);
 }
