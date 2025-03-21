@@ -1,4 +1,4 @@
-import { ForbiddenException, Injectable, NotFoundException, UnauthorizedException } from "@nestjs/common";
+import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { Task } from "./entities/task.entity";
 import { Repository } from "typeorm";

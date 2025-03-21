@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { IsBoolean, IsString } from "class-validator";
 import { ApiProperty } from "@nestjs/swagger";
 import { User } from "../../user/entities/user.entity";
@@ -34,4 +34,12 @@ export class FileInfo {
 	})
 	@ManyToOne(() => User, (user: User) => user.files)
 	user: User;
+	
+	@ApiProperty()
+	@CreateDateColumn({ type: "timestamp" })
+	createdAt?: Date;
+	
+	@ApiProperty()
+	@UpdateDateColumn({ type: "timestamp" })
+	updatedAt?: Date;
 }

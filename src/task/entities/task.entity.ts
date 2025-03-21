@@ -1,4 +1,13 @@
-import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import {
+	Column,
+	CreateDateColumn,
+	Entity,
+	JoinTable,
+	ManyToMany,
+	ManyToOne,
+	PrimaryGeneratedColumn,
+	UpdateDateColumn
+} from "typeorm";
 import { User } from "../../user/entities/user.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
@@ -39,4 +48,12 @@ export class Task {
 
 	@ManyToOne(() => User, (user) => user.tasks ,{ onDelete: "CASCADE" })
 	user: User;
+	
+	@ApiProperty()
+	@CreateDateColumn({ type: "timestamp" })
+	createdAt?: Date;
+	
+	@ApiProperty()
+	@UpdateDateColumn({ type: "timestamp" })
+	updatedAt?: Date;
 }

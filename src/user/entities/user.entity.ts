@@ -1,4 +1,13 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany, OneToOne, JoinColumn } from "typeorm";
+import {
+	Entity,
+	Column,
+	PrimaryGeneratedColumn,
+	OneToMany,
+	OneToOne,
+	JoinColumn,
+	CreateDateColumn,
+	UpdateDateColumn
+} from "typeorm";
 import {
 	IsEmail,
 	IsEnum,
@@ -115,4 +124,12 @@ export class User {
 	
 	@OneToMany(() => FileInfo, (fileInfo) => fileInfo.user)
 	files: FileInfo[]
+	
+	@ApiProperty()
+	@CreateDateColumn({ type: "timestamp" })
+	createdAt?: Date;
+	
+	@ApiProperty()
+	@UpdateDateColumn({ type: "timestamp" })
+	updatedAt?: Date;
 }
