@@ -5,11 +5,13 @@ import { Repository } from "typeorm";
 import { CreateTaskDto } from "./dto/create.dto";
 import { User, UserRole } from "../user/entities/user.entity";
 import { EditTaskDto } from "./dto/edit.dto";
+import { FileService } from "../file/file.service";
 
 @Injectable()
 export class TaskService {
 	constructor(
 		@InjectRepository(Task) private readonly taskRepository: Repository<Task>,
+		private readonly fileService: FileService,
 	) {}
 	
 	async findAll(): Promise<Task[]> {
@@ -44,6 +46,7 @@ export class TaskService {
 	}
 	
 	async create(dto:CreateTaskDto, user:User) {
+		await this.validateAttachments(dto, user);
 		return await this.taskRepository.save({ ...dto, user });
 	}
 	
@@ -57,6 +60,8 @@ export class TaskService {
 		if (user.role !== UserRole.ADMIN && user.id !== task.user.id) {
 			throw new ForbiddenException("You don't have permission to edit this task");
 		}
+		
+		await this.validateAttachments(dto, user);
 		
 		const updatedTask = this.taskRepository.merge(task, dto);
 		return await this.taskRepository.save(updatedTask);
@@ -76,5 +81,17 @@ export class TaskService {
 		await this.taskRepository.delete(id);
 		
 		return task
+	}
+	
+	private async validateAttachments(dto: EditTaskDto, user: User) {
+		if (dto.attachmentIds) {
+			dto.attachment = []
+			for (const attachmentId of dto.attachmentIds) {
+				const file = await this.fileService.getFile(attachmentId, user)
+				if (file) {
+					dto.attachment.push(file);
+				}
+			}
+		}
 	}
 }

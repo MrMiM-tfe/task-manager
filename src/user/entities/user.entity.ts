@@ -1,7 +1,18 @@
-import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from "typeorm";
-import { IsEmail, IsEnum, IsPhoneNumber, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { Entity, Column, PrimaryGeneratedColumn, OneToMany, OneToOne, JoinColumn } from "typeorm";
+import {
+	IsEmail,
+	IsEnum,
+	IsNumber,
+	IsOptional,
+	IsPhoneNumber,
+	IsString,
+	Matches,
+	MaxLength,
+	MinLength
+} from "class-validator";
 import { Task } from "../../task/entities/task.entity";
 import { ApiProperty } from "@nestjs/swagger";
+import { FileInfo } from "../../file/entities/file-info.entity";
 
 export enum UserRole {
 	ADMIN = 'admin',
@@ -64,10 +75,17 @@ export class User {
 	@Column({unique: true})
 	phone: string;
 	
-	@ApiProperty()
-	@IsString()
-	@Column({nullable: true})
-	profileImg: string;
+	@ApiProperty({
+		required: false,
+		type: "number"
+	})
+	@IsNumber()
+	@IsOptional()
+	profileImgId?: number;
+	
+	@OneToOne(() => FileInfo, {nullable: true})
+	@JoinColumn()
+	profileImg?: FileInfo;
 	
 	@ApiProperty({
 		example: 'Mahdi1234',
@@ -94,4 +112,7 @@ export class User {
 	
 	@OneToMany(() => Task, (task) => task.user)
 	tasks: Task[];
+	
+	@OneToMany(() => FileInfo, (fileInfo) => fileInfo.user)
+	files: FileInfo[]
 }

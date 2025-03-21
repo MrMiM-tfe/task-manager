@@ -1,7 +1,8 @@
-import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, Entity, JoinTable, ManyToMany, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
 import { User } from "../../user/entities/user.entity";
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { IsNumber, IsOptional, IsString, MaxLength } from "class-validator";
+import { FileInfo } from "../../file/entities/file-info.entity";
 
 @Entity()
 export class Task {
@@ -26,16 +27,16 @@ export class Task {
 	
 	@ApiProperty({
 		required: false,
+		type: [Number]
 	})
-	@IsString()
+	@IsNumber()
 	@IsOptional()
-	@Column({nullable: true})
-	attachment?: string;
+	attachmentIds?: number[];
 	
-	// @ApiProperty({
-	// 	type: () => User,
-	// 	required: false,
-	// })
+	@ManyToMany(() => FileInfo)
+	@JoinTable()
+	attachment?: FileInfo[];
+
 	@ManyToOne(() => User, (user) => user.tasks ,{ onDelete: "CASCADE" })
 	user: User;
 }
