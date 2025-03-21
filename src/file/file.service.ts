@@ -5,6 +5,7 @@ import { Repository } from "typeorm";
 import { ResetFileDto } from "./dto/register-file.dto";
 import { User, UserRole } from "../user/entities/user.entity";
 import * as fs from 'fs/promises';
+import { PaginatedDataDto } from "../common/dto/paginated-data.dto";
 
 @Injectable()
 export class FileService {
@@ -28,12 +29,46 @@ export class FileService {
 		return file
 	}
 	
-	async getAll(): Promise<FileInfo[]> {
-		return await this.fileRepository.find();
+	async getAll(page: number = 1, pageSize: number = 10) {
+		const skip = (page - 1) * pageSize;
+		
+		const [data, total] = await this.fileRepository.findAndCount({
+			skip,
+			take: pageSize,
+		});
+		
+		const totalPages = Math.ceil(total / pageSize);
+		
+		const response: PaginatedDataDto<FileInfo> = {
+			data,
+			page,
+			pageSize,
+			totalPages,
+		}
+		
+		return response;
 	}
 	
-	async getUserFiles(userId: number): Promise<FileInfo[]> {
-		return await this.fileRepository.find({where: {user: {id: userId}}});
+	async getUserFiles(userId: number, page: number = 1, pageSize: number = 10) {
+		const skip = (page - 1) * pageSize;
+		
+		const [data, total] = await this.fileRepository.findAndCount({
+			where: {user: {id: userId}},
+			skip,
+			take: pageSize
+		});
+		
+		
+		const totalPages = Math.ceil(total / pageSize);
+		
+		const response: PaginatedDataDto<FileInfo> = {
+			data,
+			page,
+			pageSize,
+			totalPages,
+		}
+		
+		return response;
 	}
 	
 	async deleteFile(id: number, user: User): Promise<void> {

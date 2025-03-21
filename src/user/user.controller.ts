@@ -1,10 +1,11 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Req } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Query, Req } from "@nestjs/common";
 import { AdminOnly } from "../common/decorators/admin.decorator";
 import { UserService } from "./user.service";
 import { UpdateUserDto, UpdateUserRestrictedDto } from "./dto/update.dto";
 import { Request } from "express";
-import { ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { ApiOperation, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { User } from "./entities/user.entity";
+import { PaginatedUserDto } from "../common/dto/paginated-data.dto";
 
 @Controller('user')
 export class UserController {
@@ -22,12 +23,20 @@ export class UserController {
 	
 	@ApiResponse({
 		status: HttpStatus.OK,
-		type: [User]
+		type: PaginatedUserDto
+	})
+	@ApiQuery({
+		name: "page",
+		required: false
+	})
+	@ApiQuery({
+		name: "pageSize",
+		required: false
 	})
 	@AdminOnly("get all users")
 	@Get()
-	async getAllUsers(){
-		return await this.userService.getAll()
+	async getAllUsers(@Query("page") page:number, @Query("pageSize") pageSize:number){
+		return await this.userService.getAll(page, pageSize)
 	}
 	
 	@ApiResponse({

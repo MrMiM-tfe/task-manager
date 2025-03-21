@@ -1,10 +1,11 @@
-import { ForbiddenException, Injectable, NotFoundException } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
 import { UpdateUserDto, UpdateUserRestrictedDto } from "./dto/update.dto";
 import * as bcrypt from 'bcrypt';
 import { FileService } from "../file/file.service";
+import { PaginatedDataDto } from "../common/dto/paginated-data.dto";
 
 @Injectable()
 export class UserService {
@@ -39,8 +40,24 @@ export class UserService {
 		return await this.userRepository.findOneBy({ id });
 	}
 
-	async getAll(): Promise<User[]> {
-		return await this.userRepository.find();
+	async getAll(page: number = 1, pageSize: number = 10) {
+		const skip = (page - 1) * pageSize;
+		
+		const [data, total] = await this.userRepository.findAndCount({
+			skip,
+			take: pageSize,
+		});
+		
+		const totalPages = Math.ceil(total / pageSize);
+		
+		const response: PaginatedDataDto<User> = {
+			data,
+			page,
+			pageSize,
+			totalPages,
+		}
+		
+		return response;
 	}
 	
 	async update(id: number, dto: UpdateUserDto): Promise<User> {

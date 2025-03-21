@@ -6,6 +6,7 @@ import { CreateTaskDto } from "./dto/create.dto";
 import { User, UserRole } from "../user/entities/user.entity";
 import { EditTaskDto } from "./dto/edit.dto";
 import { FileService } from "../file/file.service";
+import { PaginatedDataDto } from "../common/dto/paginated-data.dto";
 
 @Injectable()
 export class TaskService {
@@ -14,8 +15,24 @@ export class TaskService {
 		private readonly fileService: FileService,
 	) {}
 	
-	async findAll(): Promise<Task[]> {
-		return await this.taskRepository.find();
+	async findAll(page: number = 1, pageSize: number = 10) {
+		const skip = (page - 1) * pageSize;
+		
+		const [data, total] = await this.taskRepository.findAndCount({
+			skip,
+			take: pageSize,
+		});
+		
+		const totalPages = Math.ceil(total / pageSize);
+		
+		const response: PaginatedDataDto<Task> = {
+			data,
+			page,
+			pageSize,
+			totalPages,
+		}
+		
+		return response;
 	}
 	
 	async adminFindOne(id: number): Promise<Task> {
@@ -35,14 +52,29 @@ export class TaskService {
 		return task;
 	}
 	
-	async getUserTasks(userId: number): Promise<Task[]> {
-		return await this.taskRepository.find({
+	async getUserTasks(userId: number, page: number = 1, pageSize: number = 10) {
+		const skip = (page - 1) * pageSize;
+		
+		const [data, total] = await this.taskRepository.findAndCount({
 			where: {
 				user: {
 					id: userId
 				}
-			}
+			},
+			skip,
+			take: pageSize
 		});
+		
+		const totalPages = Math.ceil(total / pageSize);
+		
+		const response: PaginatedDataDto<Task> = {
+			data,
+			page,
+			pageSize,
+			totalPages,
+		}
+		
+		return response;
 	}
 	
 	async create(dto:CreateTaskDto, user:User) {

@@ -2,7 +2,7 @@ import {
 	Controller, FileTypeValidator, Get, HttpStatus,
 	MaxFileSizeValidator, Param,
 	ParseFilePipe,
-	Post, Req, Res,
+	Post, Query, Req, Res,
 	UploadedFile,
 	UseInterceptors
 } from "@nestjs/common";
@@ -12,7 +12,8 @@ import { multerOptions } from "./multer.config";
 import { Request, Response } from "express";
 import { FileInfo } from "./entities/file-info.entity";
 import { AdminOnly } from "../common/decorators/admin.decorator";
-import { ApiBody, ApiConsumes, ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { ApiBody, ApiConsumes, ApiOperation, ApiQuery, ApiResponse } from "@nestjs/swagger";
+import { PaginatedFileDto } from "../common/dto/paginated-data.dto";
 
 @Controller('file')
 export class FileController {
@@ -23,21 +24,37 @@ export class FileController {
 	})
 	@ApiResponse({
 		status: HttpStatus.OK,
-		type: [FileInfo]
+		type: PaginatedFileDto
+	})
+	@ApiQuery({
+		name: "page",
+		required: false
+	})
+	@ApiQuery({
+		name: "pageSize",
+		required: false
 	})
 	@Get()
-	async getUserFiles(@Req() req: Request): Promise<FileInfo[]> {
-		return await this.fileService.getUserFiles(req.user.id)
+	async getUserFiles(@Req() req: Request, @Query("page") page:number, @Query("pageSize") pageSize:number) {
+		return await this.fileService.getUserFiles(req.user.id, page, pageSize)
 	}
 	
 	@ApiResponse({
 		status: HttpStatus.OK,
-		type: [FileInfo]
+		type: PaginatedFileDto
+	})
+	@ApiQuery({
+		name: "page",
+		required: false
+	})
+	@ApiQuery({
+		name: "pageSize",
+		required: false
 	})
 	@AdminOnly('get all files')
 	@Get('/admin')
-	async getAllFiles(): Promise<FileInfo[]> {
-		return await this.fileService.getAll()
+	async getAllFiles(@Query("page") page:number, @Query("pageSize") pageSize:number) {
+		return await this.fileService.getAll(page, pageSize)
 	}
 	
 	@ApiOperation({

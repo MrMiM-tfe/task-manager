@@ -1,11 +1,12 @@
-import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Req } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpStatus, Param, Patch, Post, Query, Req } from "@nestjs/common";
 import { TaskService } from "./task.service";
 import { Request } from "express";
 import { AdminOnly } from "../common/decorators/admin.decorator";
 import { CreateTaskDto } from "./dto/create.dto";
 import { EditTaskDto } from "./dto/edit.dto";
-import { ApiOperation, ApiResponse } from "@nestjs/swagger";
+import { ApiOperation, ApiQuery, ApiResponse } from "@nestjs/swagger";
 import { Task } from "./entities/task.entity";
+import { PaginatedTaskDto } from "../common/dto/paginated-data.dto";
 
 @Controller('task')
 export class TaskController {
@@ -14,11 +15,19 @@ export class TaskController {
 	@AdminOnly("Get all tasks")
 	@ApiResponse({
 		status: HttpStatus.OK,
-		type: [Task],
+		type: PaginatedTaskDto,
+	})
+	@ApiQuery({
+		name: "page",
+		required: false
+	})
+	@ApiQuery({
+		name: "pageSize",
+		required: false
 	})
 	@Get("/admin")
-	async getAllTasks() {
-		return await this.taskService.findAll()
+	async getAllTasks(@Query("page") page:number, @Query("pageSize") pageSize:number) {
+		return await this.taskService.findAll(page, pageSize);
 	}
 	
 	@AdminOnly('Get single task')
@@ -34,13 +43,21 @@ export class TaskController {
 	@ApiOperation({
 		summary: "Get all tasks",
 	})
+	@ApiQuery({
+		name: "page",
+		required: false
+	})
+	@ApiQuery({
+		name: "pageSize",
+		required: false
+	})
 	@ApiResponse({
 		status: HttpStatus.OK,
-		type: [Task],
+		type: PaginatedTaskDto,
 	})
 	@Get()
-	async getTasks(@Req() req: Request) {
-		return await this.taskService.getUserTasks(req.user.id);
+	async getTasks(@Req() req: Request, @Query("page") page:number, @Query("pageSize") pageSize:number) {
+		return await this.taskService.getUserTasks(req.user.id, page, pageSize);
 	}
 	
 	@ApiOperation({
